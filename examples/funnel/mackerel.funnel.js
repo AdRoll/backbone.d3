@@ -10,6 +10,9 @@
 // Extends Mackerel.Bar using the class inheritance in Backbone
 Mackerel.Funnel = Mackerel.Bar.extend({
 
+    // Extend bar chart styles
+    className: Mackerel.Bar.prototype.className + ' mackerel-funnel',
+
     // Extend bar chart defaults
     defaults: _.defaults({
         barPadding: 0.7

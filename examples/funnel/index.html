@@ -9,6 +9,8 @@
     <script src="../../js/mackerel.js"></script>
     <script src="mackerel.funnel.js"></script>
 
+    <link rel="stylesheet" href="../../css/mackerel.css">
+
     <style>
         body {
             font: 14px sans-serif;
@@ -17,27 +19,15 @@
         h2 {
             margin: 0 0 5px;
         }
-        .chart {
+        .mackerel {
             height: 200px;
             width: 850px;
             margin: 0 0 20px;
         }
-        .axis path,
-        .axis line {
-            fill: none;
-            stroke: #ddd;
-            shape-rendering: crispEdges;
-        }
-        .x.axis path {
-            display: none;
-        }
-        .bar {
-            fill: steelblue;
-        }
-        .conv-rate {
+        .mackerel-funnel .conv-rate {
             fill: #666;
         }
-        .conv-rate-wrapper text {
+        .mackerel-funnel .conv-rate-wrapper text {
             fill: white;
             text-anchor: middle;
         }
@@ -55,15 +45,15 @@
         ]);
 
         var bar = new Mackerel.Bar({
-            el: $("#test-bar"),
             collection: data
         });
+        $("#test-bar").append(bar.el);
         bar.render();
 
         var funnel = new Mackerel.Funnel({
-            el: $("#test-funnel"),
             collection: data
         });
+        $("#test-funnel").append(funnel.el);
         funnel.render();
 
     });

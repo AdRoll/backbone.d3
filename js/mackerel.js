@@ -40,6 +40,8 @@ Mackerel.chartDefaults = {
 // Base view for all charts
 var Chart = Mackerel.Chart = Backbone.View.extend({
 
+    className: 'mackerel',
+
     initialize: function() {
         _.bindAll(this, 'joinData');
 
@@ -119,6 +121,8 @@ var Chart = Mackerel.Chart = Backbone.View.extend({
 
 // Basic bar chart
 var Bar = Mackerel.Bar = Chart.extend({
+
+    className: Chart.prototype.className + ' mackerel-bar',
 
     defaults: {
         barPadding: 0.2

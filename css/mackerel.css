@@ -1,0 +1,26 @@
+/*!
+ * Mackerel.js 0.1.0
+ *
+ * Copyright (c) 2013 AdRoll
+ * MIT license
+ * http://github.com/AdRoll/Mackerel
+ */
+
+
+ /* Common chart styles */
+.mackerel .axis path,
+.mackerel .axis line {
+    fill: none;
+    stroke: #ddd;
+    shape-rendering: crispEdges;
+}
+
+
+/* Bar chart styles */
+.mackerel-bar .x.axis .domain {
+    display: none;
+}
+
+.mackerel-bar .bar {
+    fill: steelblue;
+}
