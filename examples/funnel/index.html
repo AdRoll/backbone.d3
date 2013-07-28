@@ -1,0 +1,83 @@
+<!doctype html>
+<html>
+
+<head>
+    <script src="http://cdnjs.cloudflare.com/ajax/libs/jquery/1.10.2/jquery.js"></script>
+    <script src="http://cdnjs.cloudflare.com/ajax/libs/underscore.js/1.5.1/underscore.js"></script>
+    <script src="http://cdnjs.cloudflare.com/ajax/libs/backbone.js/1.0.0/backbone.js"></script>
+    <script src="http://cdnjs.cloudflare.com/ajax/libs/d3/3.2.2/d3.js"></script>
+    <script src="../../js/mackerel.js"></script>
+    <script src="mackerel.funnel.js"></script>
+
+    <style>
+        body {
+            font: 14px sans-serif;
+            margin: 15px 20px;
+        }
+        h2 {
+            margin: 0 0 5px;
+        }
+        .chart {
+            height: 200px;
+            width: 850px;
+            margin: 0 0 20px;
+        }
+        .axis path,
+        .axis line {
+            fill: none;
+            stroke: #ddd;
+            shape-rendering: crispEdges;
+        }
+        .x.axis path {
+            display: none;
+        }
+        .bar {
+            fill: steelblue;
+        }
+        .conv-rate {
+            fill: #666;
+        }
+        .conv-rate-wrapper text {
+            fill: white;
+            text-anchor: middle;
+        }
+    </style>
+
+    <script>
+    $(function() {
+
+        var data = new Backbone.Collection([
+            { x: "A", y: 105 },
+            { x: "B", y: 67  },
+            { x: "C", y: 42  },
+            { x: "D", y: 33  },
+            { x: "E", y: 10  }
+        ]);
+
+        var bar = new Mackerel.Bar({
+            el: $("#test-bar"),
+            collection: data
+        });
+        bar.render();
+
+        var funnel = new Mackerel.Funnel({
+            el: $("#test-funnel"),
+            collection: data
+        });
+        funnel.render();
+
+    });
+    </script>
+</head>
+
+<body>
+
+    <h2>Mackerel.Bar</h2>
+    <div id="test-bar" class="chart"></div>
+
+    <h2>Mackerel.Funnel (extends Mackerel.Bar)</h2>
+    <div id="test-funnel" class="chart"></div>
+
+</body>
+
+</html>
