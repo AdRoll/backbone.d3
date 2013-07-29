@@ -114,24 +114,26 @@ var Chart = Mackerel.Chart = Backbone.View.extend({
     // Maps this.collection to a dataset that can be passed to D3
     getData: function() {
         return this.collection.chain()
+            .filter(this.isValidDatum, this)
             .map(this.getDatum, this)
-            .compact()
             .value();
     },
 
-    // Maps an individual model to a datum in D3
+    // Maps an individual (valid) model to a datum in D3
     getDatum: function(model) {
-        var opts = this.options,
-            x = model.get(opts.xAttr),
-            y = model.get(opts.yAttr);
-
-        // Discard invalid data
-        if (!opts.xValid(x) || !opts.yValid(y)) return null;
-
         return _.extend(model.toJSON(), {
-            x: x,
-            y: y
+            x: model.get(this.options.xAttr),
+            y: model.get(this.options.yAttr)
         });
+    },
+
+    // Determines if a datum or model is valid
+    isValidDatum: function(d) {
+        var opts = this.options;
+        if (d instanceof Backbone.Model) {
+            d = d.toJSON();
+        }
+        return opts.xValid(d[opts.xAttr]) && opts.yValid(d[opts.yAttr]);
     },
 
     // Control how data is joined to elements with the joinAttr option
