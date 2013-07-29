@@ -248,4 +248,121 @@ var Bar = Mackerel.Bar = Chart.extend({
 });
 
 
+// Multi line chart
+var Line = Mackerel.Line = Chart.extend({
+
+    className: Chart.prototype.className + ' mackerel-line',
+
+    defaults: {
+        valuesAttr: 'values',               // Values list on each series
+        colorAttr: 'color',                 // Color attribute on each series
+        interpolate: 'monotone',            // Line interpolation method
+        colorScale: d3.scale.category10()   // Default color scale for lines
+    },
+
+    getData: function() {
+        // Perform data validation on per-series level
+        return this.collection.map(this.getDatum, this);
+    },
+
+    // Parse an individual series of data
+    getDatum: function(model, i) {
+        var opts = this.options,
+            series = model.toJSON();
+
+        // Make sure each series has a color
+        series[opts.colorAttr] = series[opts.colorAttr] || opts.colorScale(i);
+
+        // Filter invalid values
+        series[opts.valuesAttr] = _.filter(series[opts.valuesAttr], this.isValidDatum, this);
+
+        return series;
+    },
+
+    renderAxes: function() {
+        // X axis
+        var xAxis = d3.svg.axis()
+            .scale(this.scales.x)
+            .orient('bottom')
+            .ticks(Math.ceil(this.width / 150))
+            .tickFormat(this.options.xFormat)
+            .tickPadding(5);
+
+        this.svg.append('g')
+            .attr('class', 'x axis')
+            .attr('transform', 'translate(0,' + this.height + ')')
+            .call(xAxis);
+
+        // Y axis
+        var yAxis = d3.svg.axis()
+            .scale(this.scales.y)
+            .orient('left')
+            .ticks(Math.ceil(this.height / 40))
+            .tickFormat(this.options.yFormat)
+            .tickSize(-this.width)
+            .tickPadding(10);
+
+        this.svg.append('g')
+            .attr('class', 'y axis')
+            .call(yAxis);
+    },
+
+    renderData: function(data) {
+        var x = this.scales.x,
+            y = this.scales.y,
+            opts = this.options;
+
+        // Lines
+        var line = d3.svg.line()
+            .interpolate(opts.interpolate)
+            .defined(function(d) { return d && opts.yValid(d[opts.yAttr]); })
+            .x(function(d) { return x(d[opts.xAttr]); })
+            .y(function(d) { return y(d[opts.yAttr]); });
+
+        var series = this.svg.selectAll('.series')
+            .data(this.getData(), this.joinData)
+            .enter().append('g')
+                .attr('class', 'series');
+
+        series.append('path')
+            .attr('class', 'line')
+            .attr('d', function(series) { return line(series[opts.valuesAttr]); })
+            .style('stroke', function(series) { return series[opts.colorAttr]; });
+    },
+
+    getXScale: function() {
+        var data = this.getData();
+        return d3.scale.linear()
+            .rangeRound([0, this.width])
+            .domain(this.getLinearExtent(data, this.options.xAttr));
+    },
+
+    getYScale: function() {
+        var data = this.getData();
+        return d3.scale.linear()
+            .rangeRound([this.height, 0])
+            .domain([
+                0, // Force scale to start from zero
+                this.getLinearExtent(data, this.options.yAttr, 'max')
+            ])
+            .nice();
+    },
+
+    getLinearExtent: function(data, attr, minmax) {
+        if (!minmax) {
+            // Keep recursive behavior
+            return Chart.prototype.getLinearExtent.apply(this, arguments);
+        }
+
+        // Return extent over all series
+        return _(data).chain().map(function(series) {
+            return _[minmax](series[this.options.valuesAttr], function(d) {
+                return d && d[attr];
+            })[attr];
+        }, this)[minmax]().value();
+    }
+
+});
+
+
 }).call(this);

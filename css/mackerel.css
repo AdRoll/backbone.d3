@@ -24,3 +24,12 @@
 .mackerel-bar .bar {
     fill: steelblue;
 }
+
+
+/* Line chart */
+.mackerel-line .series .line {
+    stroke-width: 2;
+    stroke-linejoin: round;
+    stroke-linecap: round;
+    fill: none;
+}
