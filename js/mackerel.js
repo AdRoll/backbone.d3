@@ -365,4 +365,24 @@ var Line = Mackerel.Line = Chart.extend({
 });
 
 
+// Time series chart
+var TimeSeries = Mackerel.TimeSeries = Line.extend({
+
+    className: Line.prototype.className + ' mackerel-timeseries',
+
+    defaults: _.defaults({
+        xFormat: d3.time.scale.utc().tickFormat(),
+        xValid: _.isDate
+    }, Line.prototype.defaults),
+
+    getXScale: function() {
+        var data = this.getData();
+        return d3.time.scale.utc()
+            .range([0, this.width])
+            .domain(this.getLinearExtent(data, this.options.xAttr));
+    }
+
+});
+
+
 }).call(this);
