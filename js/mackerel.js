@@ -23,11 +23,34 @@ var _           = root._,
     d3          = root.d3;
 
 
+// Helpers
+// -------
+
+// Round number to N significant figures and show with SI prefix
+var prettyNumber = function(num, sigFigs) {
+    if (num === 0) return "0";
+    if (_.isNaN(num)) return "NaN";
+    if (sigFigs === undefined) sigFigs = 3;
+    // http://blog.magnetiq.com/post/497605344/rounding-to-a-certain-significant-figures-in-javascript
+    var mult = Math.pow(10,
+        sigFigs - Math.floor(Math.log(num) / Math.LN10) - 1),
+        rounded = Math.round(num * mult) / mult;
+    return d3.format("s")(rounded);
+};
+
+
 // Global defaults for charts
 Mackerel.chartDefaults = {
     joinAttr: null,
+
     xAttr: 'x',
+    xFormat: prettyNumber,
+    xValid: _.isFinite,
+
     yAttr: 'y',
+    yFormat: prettyNumber,
+    yValid: _.isFinite,
+
     margin: {
         top: 10,
         right: 10,
@@ -90,14 +113,24 @@ var Chart = Mackerel.Chart = Backbone.View.extend({
 
     // Maps this.collection to a dataset that can be passed to D3
     getData: function() {
-        return this.collection.map(this.getDatum, this);
+        return this.collection.chain()
+            .map(this.getDatum, this)
+            .compact()
+            .value();
     },
 
     // Maps an individual model to a datum in D3
     getDatum: function(model) {
+        var opts = this.options,
+            x = model.get(opts.xAttr),
+            y = model.get(opts.yAttr);
+
+        // Discard invalid data
+        if (!opts.xValid(x) || !opts.yValid(y)) return null;
+
         return _.extend(model.toJSON(), {
-            x: model.get(this.options.xAttr),
-            y: model.get(this.options.yAttr)
+            x: x,
+            y: y
         });
     },
 
@@ -110,6 +143,19 @@ var Chart = Mackerel.Chart = Backbone.View.extend({
             return d[joinAttr];
         } else {
             return i;
+        }
+    },
+
+    // Get the minimum or maximum value over the whole data for linear scales
+    getLinearExtent: function(data, attr, minmax) {
+        // Return either one extreme or whole extent
+        if (minmax) {
+            return _(data).chain().pluck(attr)[minmax]().value();
+        } else {
+            return [
+                this.getLinearExtent(data, attr, 'min'),
+                this.getLinearExtent(data, attr, 'max')
+            ];
         }
     },
 
@@ -128,6 +174,8 @@ var Bar = Mackerel.Bar = Chart.extend({
     className: Chart.prototype.className + ' mackerel-bar',
 
     defaults: {
+        xFormat: _.identity,
+        xValid: Boolean,
         barPadding: 0.2
     },
 
@@ -135,7 +183,8 @@ var Bar = Mackerel.Bar = Chart.extend({
         // X axis
         var xAxis = d3.svg.axis()
             .scale(this.scales.x)
-            .orient('bottom');
+            .orient('bottom')
+            .tickFormat(this.options.xFormat);
 
         this.svg.append('g')
             .attr('class', 'x axis')
@@ -148,6 +197,7 @@ var Bar = Mackerel.Bar = Chart.extend({
             .orient('left')
             .ticks(Math.ceil(this.height / 40))
             .tickSize(-this.width)
+            .tickFormat(this.options.yFormat)
             .tickPadding(6);
 
         this.svg.append('g')
@@ -172,15 +222,20 @@ var Bar = Mackerel.Bar = Chart.extend({
     },
 
     getXScale: function() {
+        var data = this.getData();
         return d3.scale.ordinal()
             .rangeRoundBands([0, this.width], this.options.barPadding)
-            .domain(this.collection.pluck(this.options.xAttr));
+            .domain(_.pluck(data, this.options.xAttr));
     },
 
     getYScale: function() {
+        var data = this.getData();
         return d3.scale.linear()
             .rangeRound([this.height, 0])
-            .domain([ 0, _.max(this.collection.pluck(this.options.yAttr)) ])
+            .domain([
+                0,
+                this.getLinearExtent(data, this.options.yAttr, 'max')
+            ])
             .nice();
     }
 
