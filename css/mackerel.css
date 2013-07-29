@@ -33,3 +33,14 @@
     stroke-linecap: round;
     fill: none;
 }
+
+
+/* Country map */
+.mackerel-countrymap .country {
+    fill: #ddd;
+    fill-rule: evenodd;
+    stroke: #fff;
+    stroke-width: 1;
+    stroke-linejoin: round;
+    stroke-linecap: round;
+}
