@@ -50,10 +50,12 @@ Mackerel.chartDefaults = {
     xAttr: 'x',
     xFormat: prettyNumber,
     xValid: _.isFinite,
+    xScale: 'linear',
 
     yAttr: 'y',
     yFormat: prettyNumber,
     yValid: _.isFinite,
+    yScale: 'linear',
 
     margin: {
         top: 10,
@@ -236,7 +238,7 @@ var Bar = Mackerel.Bar = Chart.extend({
 
     getYScale: function() {
         var data = this.getData();
-        return d3.scale.linear()
+        return d3.scale[this.options.yScale]()
             .rangeRound([this.height, 0])
             .domain([
                 0,
@@ -332,14 +334,14 @@ var Line = Mackerel.Line = Chart.extend({
 
     getXScale: function() {
         var data = this.getData();
-        return d3.scale.linear()
+        return d3.scale[this.options.xScale]()
             .rangeRound([0, this.width])
             .domain(this.getLinearExtent(data, this.options.xAttr));
     },
 
     getYScale: function() {
         var data = this.getData();
-        return d3.scale.linear()
+        return d3.scale[this.options.yScale]()
             .rangeRound([this.height, 0])
             .domain([
                 0, // Force scale to start from zero
@@ -468,7 +470,7 @@ var CountryMap = Mackerel.CountryMap = Chart.extend({
     getYScale: function() {
         var data = this.getData(),
             domain = this.getLinearExtent(data, 'y');
-        return d3.scale.linear()
+        return d3.scale[this.options.yScale]()
             .range(this.options.colorRange)
             // If data contains only one datum it should be mapped
             // to the highest color
