@@ -409,7 +409,7 @@ var CountryMap = Mackerel.CountryMap = Chart.extend({
     },
 
     initialize: function() {
-        _.bindAll(this, 'getMapTransform', 'getCountryFill');
+        _.bindAll(this, 'getMapTransform', 'getCountryFill', 'getCountryClass');
         // Optimize calls to getDataBounds
         this.getDataBounds = _.memoize(this.getDataBounds, function(data) {
             return _.keys(data).toString();
@@ -447,7 +447,7 @@ var CountryMap = Mackerel.CountryMap = Chart.extend({
             .selectAll('path')
                 .data(opts.countryData.features)
                 .enter().append('path')
-                    .attr('class', 'country')
+                    .attr('class', this.getCountryClass)
                     .attr('d', x)
                     .attr('data-code', function(f) {
                         return f.properties && f.properties.code;
@@ -473,6 +473,15 @@ var CountryMap = Mackerel.CountryMap = Chart.extend({
             // If data contains only one datum it should be mapped
             // to the highest color
             .domain(data.length == 1 ? [0, domain[1]] : domain);
+    },
+
+    getCountryClass: function(f) {
+        var classes = ['country'],
+            d = _(this.getData()).findWhere({ x: f.properties && f.properties.code });
+        if (d && this.options.yValid(d.y)) {
+            classes.push('country-data');
+        }
+        return classes.join(' ');
     },
 
     getCountryFill: function(f) {
