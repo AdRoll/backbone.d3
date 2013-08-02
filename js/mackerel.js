@@ -399,6 +399,7 @@ var CountryMap = Mackerel.CountryMap = Chart.extend({
         ],
         strokeWidth: 2,             // Width of country border (multiplier)
         projection: 'mercator',     // d3.geo projection (https://github.com/d3/d3-geo-projection/)
+        autoZoom: true,             // Automatically crop and zoom map to non-zero data
         zoomFactor: 0.9,            // Values <1 leave some padding when zooming
         crop: [                     // Maximum coordinates for each direction
             [-180, 83.7],           // [west, north] (crop North Pole)
@@ -521,7 +522,7 @@ var CountryMap = Mackerel.CountryMap = Chart.extend({
 
     getMapTransform: function() {
         // http://bl.ocks.org/mbostock/4699541
-        var b = this.getDataBounds(this.getData()),
+        var b = this.getDataBounds(this.options.autoZoom ? this.getData() : null),
             base = this.scales.x.projection().translate(),
             scale = this.getMapScale(),
             t = [-(b[1][0] + b[0][0]) / 2, -(b[1][1] + b[0][1]) / 2];
@@ -531,7 +532,7 @@ var CountryMap = Mackerel.CountryMap = Chart.extend({
     getMapScale: function() {
         // http://bl.ocks.org/mbostock/4699541
         var zoomFactor = this.options.zoomFactor,
-            b = this.getDataBounds(this.getData()),
+            b = this.getDataBounds(this.options.autoZoom ? this.getData() : null),
             w = this.width,
             h = this.height;
         return zoomFactor / Math.max((b[1][0] - b[0][0]) / w, (b[1][1] - b[0][1]) / h);
