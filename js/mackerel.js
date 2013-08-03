@@ -26,20 +26,28 @@ var _           = root._,
 // Helpers
 // -------
 
-// Round number to N significant figures and show with SI prefix
-var prettyNumber = function(num, options) {
-    if (num === 0) return "0";
-    if (_.isNaN(num)) return "NaN";
+Mackerel.format = {
 
-    // Set default options
-    var opts = _.extend({
-        sigFigs: 3
-    }, options);
+    // Round number to N significant figures and show with SI prefix
+    // e.g. shortNumber(12345) -> "12.3k"
+    shortNumber: function(num, options) {
+        if (num === 0) return "0";
+        if (_.isNaN(num)) return "NaN";
 
-    // http://blog.magnetiq.com/post/497605344/rounding-to-a-certain-significant-figures-in-javascript
-    var mult = Math.pow(10, opts.sigFigs - Math.floor(Math.log(num) / Math.LN10) - 1),
-        rounded = Math.round(num * mult) / mult;
-    return d3.format("s")(rounded);
+        // Set default options
+        var opts = _.extend({
+            sigFigs: 3
+        }, options);
+
+        // http://blog.magnetiq.com/post/497605344/rounding-to-a-certain-significant-figures-in-javascript
+        var mult = Math.pow(10, opts.sigFigs - Math.floor(Math.log(num) / Math.LN10) - 1),
+            rounded = Math.round(num * mult) / mult;
+        return d3.format("s")(rounded);
+    },
+
+    // Show full precision with thousands separators
+    longNumber: d3.format(',')
+
 };
 
 
@@ -48,12 +56,12 @@ Mackerel.chartDefaults = {
     joinAttr: null,
 
     xAttr: 'x',
-    xFormat: prettyNumber,
+    xFormat: Mackerel.format.shortNumber,
     xValid: _.isFinite,
     xScale: 'linear',
 
     yAttr: 'y',
-    yFormat: prettyNumber,
+    yFormat: Mackerel.format.shortNumber,
     yValid: _.isFinite,
     yScale: 'linear',
 
@@ -394,7 +402,7 @@ var CountryMap = Mackerel.CountryMap = Chart.extend({
 
     defaults: {
         xValid: _.isString,
-        yFormat: d3.format(','),
+        yFormat: Mackerel.format.longNumber,
         colorRange: [               // Choropleth fill colors
             d3.interpolate('white', 'steelblue')(0.2), // lightened steelblue
             'steelblue'                                // steelblue
