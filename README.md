@@ -1,8 +1,8 @@
-# Mackerel
+# backbone.d3
 
-Mackerel is a [Backbone.js](http://backbonejs.org/) plugin that provides a set of reusable charts using the [D3.js visualization library](http://d3js.org/).
+backbone.d3 is a [Backbone.js](http://backbonejs.org/) plugin that provides a set of reusable charts using the [D3.js visualization library](http://d3js.org/).
 
-[Stay tuned](http://twitter.com/mackereljs) for more info!
+[Stay tuned](http://twitter.com/backbone_d3) for more info!
 
 
 ## Copyright and license
