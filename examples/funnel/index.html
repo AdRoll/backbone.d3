@@ -6,10 +6,10 @@
     <script src="http://cdnjs.cloudflare.com/ajax/libs/underscore.js/1.5.1/underscore.js"></script>
     <script src="http://cdnjs.cloudflare.com/ajax/libs/backbone.js/1.0.0/backbone.js"></script>
     <script src="http://cdnjs.cloudflare.com/ajax/libs/d3/3.2.2/d3.js"></script>
-    <script src="../../js/mackerel.js"></script>
-    <script src="mackerel.funnel.js"></script>
+    <script src="../../js/backbone.d3.js"></script>
+    <script src="backbone.d3.funnel.js"></script>
 
-    <link rel="stylesheet" href="../../css/mackerel.css">
+    <link rel="stylesheet" href="../../css/backbone.d3.css">
 
     <style>
         body {
@@ -19,15 +19,15 @@
         h2 {
             margin: 0 0 5px;
         }
-        .mackerel {
+        .bbd3 {
             height: 200px;
             width: 850px;
             margin: 0 0 20px;
         }
-        .mackerel-funnel .conv-rate {
+        .bbd3-funnel .conv-rate {
             fill: #666;
         }
-        .mackerel-funnel .conv-rate-wrapper text {
+        .bbd3-funnel .conv-rate-wrapper text {
             fill: white;
             text-anchor: middle;
         }
@@ -44,13 +44,13 @@
             { x: "E", y: 10  }
         ]);
 
-        var bar = new Mackerel.Bar({
+        var bar = new Backbone.D3.Bar({
             collection: data
         });
         $("#test-bar").append(bar.el);
         bar.render();
 
-        var funnel = new Mackerel.Funnel({
+        var funnel = new Backbone.D3.Funnel({
             collection: data
         });
         $("#test-funnel").append(funnel.el);
@@ -62,10 +62,10 @@
 
 <body>
 
-    <h2>Mackerel.Bar</h2>
+    <h2>Backbone.D3.Bar</h2>
     <div id="test-bar" class="chart"></div>
 
-    <h2>Mackerel.Funnel (extends Mackerel.Bar)</h2>
+    <h2>Backbone.D3.Funnel (extends Backbone.D3.Bar)</h2>
     <div id="test-funnel" class="chart"></div>
 
 </body>

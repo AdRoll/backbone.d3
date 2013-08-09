@@ -1,8 +1,8 @@
-// Mackerel.js 0.1.0
+// backbone.d3 0.1.0
 //
 // Copyright (c) 2013 AdRoll
 // MIT license
-// http://github.com/AdRoll/Mackerel
+// http://github.com/AdRoll/backbone.d3
 
 (function() {
 
@@ -11,22 +11,23 @@
 // Save a reference to the global object
 var root = this;
 
-// The top-level namespace
-var Mackerel = root.Mackerel = {};
-
-// Current version of the library
-Mackerel.VERSION = '0.1.0';
-
 // Dependencies
 var _           = root._,
     Backbone    = root.Backbone,
     d3          = root.d3;
 
+// The top-level namespace
+var D3 = Backbone.D3 = {};
+
+// Current version of the library
+D3.VERSION = '0.1.0';
+
+
 
 // Helpers
 // -------
 
-Mackerel.format = {
+D3.format = {
 
     // Round number to N significant figures and show with SI prefix
     // e.g. shortNumber(12345) -> "12.3k"
@@ -52,16 +53,16 @@ Mackerel.format = {
 
 
 // Global defaults for charts
-Mackerel.chartDefaults = {
+D3.chartDefaults = {
     joinAttr: null,
 
     xAttr: 'x',
-    xFormat: Mackerel.format.shortNumber,
+    xFormat: D3.format.shortNumber,
     xValid: _.isFinite,
     xScale: 'linear',
 
     yAttr: 'y',
-    yFormat: Mackerel.format.shortNumber,
+    yFormat: D3.format.shortNumber,
     yValid: _.isFinite,
     yScale: 'linear',
 
@@ -75,9 +76,9 @@ Mackerel.chartDefaults = {
 
 
 // Base view for all charts
-var Chart = Mackerel.Chart = Backbone.View.extend({
+var Chart = D3.Chart = Backbone.View.extend({
 
-    className: 'mackerel',
+    className: 'bbd3',
 
     initialize: function() {
         _.bindAll(this, 'joinData');
@@ -86,7 +87,7 @@ var Chart = Mackerel.Chart = Backbone.View.extend({
         _.defaults(
             this.options,               // Options for this instance
             _.result(this, 'defaults'), // Class level defaults
-            Mackerel.chartDefaults      // Library level defaults
+            D3.chartDefaults      // Library level defaults
         );
 
         Backbone.View.prototype.initialize.apply(this, arguments);
@@ -185,9 +186,9 @@ var Chart = Mackerel.Chart = Backbone.View.extend({
 
 
 // Basic bar chart
-var Bar = Mackerel.Bar = Chart.extend({
+var Bar = D3.Bar = Chart.extend({
 
-    className: Chart.prototype.className + ' mackerel-bar',
+    className: Chart.prototype.className + ' bbd3-bar',
 
     defaults: {
         xFormat: _.identity,
@@ -259,9 +260,9 @@ var Bar = Mackerel.Bar = Chart.extend({
 
 
 // Multi line chart
-var Line = Mackerel.Line = Chart.extend({
+var Line = D3.Line = Chart.extend({
 
-    className: Chart.prototype.className + ' mackerel-line',
+    className: Chart.prototype.className + ' bbd3-line',
 
     defaults: {
         valuesAttr: 'values',               // Values list on each series
@@ -376,9 +377,9 @@ var Line = Mackerel.Line = Chart.extend({
 
 
 // Time series chart
-var TimeSeries = Mackerel.TimeSeries = Line.extend({
+var TimeSeries = D3.TimeSeries = Line.extend({
 
-    className: Line.prototype.className + ' mackerel-timeseries',
+    className: Line.prototype.className + ' bbd3-timeseries',
 
     defaults: _.defaults({
         xFormat: d3.time.scale.utc().tickFormat(),
@@ -396,13 +397,13 @@ var TimeSeries = Mackerel.TimeSeries = Line.extend({
 
 
 // Country map
-var CountryMap = Mackerel.CountryMap = Chart.extend({
+var CountryMap = D3.CountryMap = Chart.extend({
 
-    className: Chart.prototype.className + ' mackerel-countrymap',
+    className: Chart.prototype.className + ' bbd3-countrymap',
 
     defaults: {
         xValid: _.isString,
-        yFormat: Mackerel.format.longNumber,
+        yFormat: D3.format.longNumber,
         colorRange: [               // Choropleth fill colors
             d3.interpolate('white', 'steelblue')(0.2), // lightened steelblue
             'steelblue'                                // steelblue

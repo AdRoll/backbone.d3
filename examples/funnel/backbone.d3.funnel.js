@@ -1,24 +1,24 @@
-// Funnel chart for Mackerel.js
+// Funnel chart for backbone.d3
 //
 // Copyright (c) 2013 AdRoll
 // MIT license
-// http://github.com/AdRoll/Mackerel
+// http://github.com/AdRoll/backbone.d3
 
 (function() {
 
-// Define a new chart type: Mackerel.Funnel
-// Extends Mackerel.Bar using the class inheritance in Backbone
-Mackerel.Funnel = Mackerel.Bar.extend({
+// Define a new chart type: Backbone.D3.Funnel
+// Extends Backbone.D3.Bar using the class inheritance in Backbone
+Backbone.D3.Funnel = Backbone.D3.Bar.extend({
 
     // Extend bar chart styles
-    className: Mackerel.Bar.prototype.className + ' mackerel-funnel',
+    className: Backbone.D3.Bar.prototype.className + ' bbd3-funnel',
 
     // Extend bar chart defaults
     defaults: _.defaults({
         barPadding: 0.7
-    }, Mackerel.Bar.prototype.defaults),
+    }, Backbone.D3.Bar.prototype.defaults),
 
-    // Overrides renderData in Mackerel.Bar
+    // Overrides renderData in Backbone.D3.Bar
     renderData: function() {
         var chart = this,
             opts = this.options,
@@ -27,7 +27,7 @@ Mackerel.Funnel = Mackerel.Bar.extend({
             data = this.getData();
 
         // Render bars using superclass
-        Mackerel.Bar.prototype.renderData.call(this);
+        Backbone.D3.Bar.prototype.renderData.call(this);
 
         // Conversion rates
         var barGap = x.rangeBand() * opts.barPadding / (1 - opts.barPadding),

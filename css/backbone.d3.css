@@ -1,15 +1,15 @@
 /*!
- * Mackerel.js 0.1.0
+ * backbone.d3 0.1.0
  *
  * Copyright (c) 2013 AdRoll
  * MIT license
- * http://github.com/AdRoll/Mackerel
+ * http://github.com/AdRoll/backbone.d3
  */
 
 
  /* Common chart styles */
-.mackerel .axis path,
-.mackerel .axis line {
+.bbd3 .axis path,
+.bbd3 .axis line {
     fill: none;
     stroke: #ddd;
     shape-rendering: crispEdges;
@@ -17,17 +17,17 @@
 
 
 /* Bar chart styles */
-.mackerel-bar .x.axis .domain {
+.bbd3-bar .x.axis .domain {
     display: none;
 }
 
-.mackerel-bar .bar {
+.bbd3-bar .bar {
     fill: steelblue;
 }
 
 
 /* Line chart */
-.mackerel-line .series .line {
+.bbd3-line .series .line {
     stroke-width: 2;
     stroke-linejoin: round;
     stroke-linecap: round;
@@ -36,7 +36,7 @@
 
 
 /* Country map */
-.mackerel-countrymap .country {
+.bbd3-countrymap .country {
     fill: #ddd;
     fill-rule: evenodd;
     stroke: #fff;
