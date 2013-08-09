@@ -87,7 +87,7 @@ var Chart = D3.Chart = Backbone.View.extend({
         _.defaults(
             this.options,               // Options for this instance
             _.result(this, 'defaults'), // Class level defaults
-            D3.chartDefaults      // Library level defaults
+            D3.chartDefaults            // Library level defaults
         );
 
         Backbone.View.prototype.initialize.apply(this, arguments);
@@ -115,6 +115,7 @@ var Chart = D3.Chart = Backbone.View.extend({
 
         // Render chart
         if (this.collection instanceof Backbone.Collection) {
+            this.data = this.getData();
             this.scales = {
                 x: this.getXScale(),
                 y: this.getYScale()
@@ -228,7 +229,7 @@ var Bar = D3.Bar = Chart.extend({
             y = this.scales.y;
 
         var bars = this.svg.selectAll('.bar')
-            .data(this.getData(), this.joinData)
+            .data(this.data, this.joinData)
             .enter().append('rect')
                 .attr('class', 'bar')
                 .attr('width', x.rangeBand())
@@ -239,19 +240,17 @@ var Bar = D3.Bar = Chart.extend({
     },
 
     getXScale: function() {
-        var data = this.getData();
         return d3.scale.ordinal()
             .rangeRoundBands([0, this.width], this.options.barPadding)
-            .domain(_.pluck(data, this.options.xAttr));
+            .domain(_.pluck(this.data, this.options.xAttr));
     },
 
     getYScale: function() {
-        var data = this.getData();
         return d3.scale[this.options.yScale]()
             .rangeRound([this.height, 0])
             .domain([
                 0,
-                this.getLinearExtent(data, this.options.yAttr, 'max')
+                this.getLinearExtent(this.data, this.options.yAttr, 'max')
             ])
             .nice();
     }
@@ -318,7 +317,7 @@ var Line = D3.Line = Chart.extend({
             .call(yAxis);
     },
 
-    renderData: function(data) {
+    renderData: function() {
         var x = this.scales.x,
             y = this.scales.y,
             opts = this.options;
@@ -331,7 +330,7 @@ var Line = D3.Line = Chart.extend({
             .y(function(d) { return y(d[opts.yAttr]); });
 
         var series = this.svg.selectAll('.series')
-            .data(this.getData(), this.joinData)
+            .data(this.data, this.joinData)
             .enter().append('g')
                 .attr('class', 'series');
 
@@ -342,19 +341,17 @@ var Line = D3.Line = Chart.extend({
     },
 
     getXScale: function() {
-        var data = this.getData();
         return d3.scale[this.options.xScale]()
             .rangeRound([0, this.width])
-            .domain(this.getLinearExtent(data, this.options.xAttr));
+            .domain(this.getLinearExtent(this.data, this.options.xAttr));
     },
 
     getYScale: function() {
-        var data = this.getData();
         return d3.scale[this.options.yScale]()
             .rangeRound([this.height, 0])
             .domain([
                 0, // Force scale to start from zero
-                this.getLinearExtent(data, this.options.yAttr, 'max')
+                this.getLinearExtent(this.data, this.options.yAttr, 'max')
             ])
             .nice();
     },
@@ -387,10 +384,9 @@ var TimeSeries = D3.TimeSeries = Line.extend({
     }, Line.prototype.defaults),
 
     getXScale: function() {
-        var data = this.getData();
         return d3.time.scale.utc()
             .range([0, this.width])
-            .domain(this.getLinearExtent(data, this.options.xAttr));
+            .domain(this.getLinearExtent(this.data, this.options.xAttr));
     }
 
 });
@@ -477,18 +473,17 @@ var CountryMap = D3.CountryMap = Chart.extend({
     },
 
     getYScale: function() {
-        var data = this.getData(),
-            domain = this.getLinearExtent(data, 'y');
+        var domain = this.getLinearExtent(this.data, 'y');
         return d3.scale[this.options.yScale]()
             .range(this.options.colorRange)
             // If data contains only one datum it should be mapped
             // to the highest color
-            .domain(data.length == 1 ? [0, domain[1]] : domain);
+            .domain(this.data.length == 1 ? [0, domain[1]] : domain);
     },
 
     getCountryClass: function(f) {
         var classes = ['country'],
-            d = _(this.getData()).findWhere({ x: f.properties && f.properties.code });
+            d = _(this.data).findWhere({ x: f.properties && f.properties.code });
         if (d && this.options.yValid(d.y)) {
             classes.push('country-data');
         }
@@ -497,13 +492,13 @@ var CountryMap = D3.CountryMap = Chart.extend({
 
     getCountryFill: function(f) {
         if (!f.properties) return null;
-        var d = _(this.getData()).findWhere({ x: f.properties.code });
+        var d = _(this.data).findWhere({ x: f.properties.code });
         return d ? this.scales.y(d.y) : null;
     },
 
     getCountryTitle: function(f) {
         if (!f.properties) return '';
-        var d = _(this.getData()).findWhere({ x: f.properties.code }),
+        var d = _(this.data).findWhere({ x: f.properties.code }),
             title = f.properties.name;
         if (d && this.options.yValid(d.y)) {
             title += ': ' + this.options.yFormat(d.y);
@@ -513,7 +508,7 @@ var CountryMap = D3.CountryMap = Chart.extend({
 
     addCountryTooltip: function(node, f) {
         if (!f.properties) return;
-        var dataBounds = this.getDataBounds(this.getData()),
+        var dataBounds = this.getDataBounds(this.data),
             bounds = this.scales.x.bounds(f);
 
         if ($.fn.tooltip) {
@@ -542,7 +537,7 @@ var CountryMap = D3.CountryMap = Chart.extend({
 
     getMapTransform: function() {
         // http://bl.ocks.org/mbostock/4699541
-        var b = this.getDataBounds(this.options.autoZoom ? this.getData() : null),
+        var b = this.getDataBounds(this.options.autoZoom ? this.data : null),
             base = this.scales.x.projection().translate(),
             scale = this.getMapScale(),
             t = [-(b[1][0] + b[0][0]) / 2, -(b[1][1] + b[0][1]) / 2];
@@ -552,7 +547,7 @@ var CountryMap = D3.CountryMap = Chart.extend({
     getMapScale: function() {
         // http://bl.ocks.org/mbostock/4699541
         var zoomFactor = this.options.zoomFactor,
-            b = this.getDataBounds(this.options.autoZoom ? this.getData() : null),
+            b = this.getDataBounds(this.options.autoZoom ? this.data : null),
             w = this.width,
             h = this.height;
         return zoomFactor / Math.max((b[1][0] - b[0][0]) / w, (b[1][1] - b[0][1]) / h);
