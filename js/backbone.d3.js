@@ -17,7 +17,7 @@ var _           = root._,
     d3          = root.d3;
 
 // The top-level namespace
-var D3 = Backbone.D3 = {};
+var D3 = root.D3 = Backbone.D3 = {};
 
 // Current version of the library
 D3.VERSION = '0.1.0';
