@@ -23,8 +23,7 @@ Backbone.D3.Funnel = Backbone.D3.Bar.extend({
         var chart = this,
             opts = this.options,
             x = this.scales.x,
-            y = this.scales.y,
-            data = this.getData();
+            y = this.scales.y;
 
         // Render bars using superclass
         Backbone.D3.Bar.prototype.renderData.call(this);
@@ -38,12 +37,12 @@ Backbone.D3.Funnel = Backbone.D3.Bar.extend({
 
         var convRates = this.svg.selectAll(".conv-rate-wrapper")
             // Leave out last value from conversion rates
-            .data(_.initial(data), this.joinData)
+            .data(this.collection.initial(), this.joinData)
             .enter().append("g")
                 .attr("class", "conv-rate-wrapper")
                 .attr("transform", function(d) {
                     var offset = (barGap - convWidth) / 2,
-                        tx = Math.round(x(d.x) + x.rangeBand() + offset),
+                        tx = Math.round(x(chart.getX(d)) + x.rangeBand() + offset),
                         ty = Math.round(y(0) - convHeight - chart.height / 4);
                     return "translate(" + tx + "," + ty + ")";
                 });
@@ -60,15 +59,17 @@ Backbone.D3.Funnel = Backbone.D3.Bar.extend({
             .attr("dy", "0.35em")
             .style("font-size", convFontSize + "px")
             .text(function(d, i) {
-                return chart._getConvRate(d, i, data) + "%";
+                return chart._getConvRate(d, i) + "%";
             });
     },
 
     // Calculates the conversion rate between two values
-    _getConvRate: function(d, i, data) {
-        if (d.y === 0) return 0;
+    _getConvRate: function(d, i) {
+        var yValue = this.getY(d);
+        if (yValue === 0) return 0;
         // Show conversion rate between bars
-        return Math.round(data[i + 1].y / d.y * 100);
+        var nextBar = this.collection.at(i + 1);
+        return Math.round(this.getY(nextBar) / yValue * 100);
     },
 
     // Returns the SVG path for a conversion rate arrow

@@ -115,7 +115,6 @@ var Chart = D3.Chart = Backbone.View.extend({
 
         // Render chart
         if (this.collection instanceof Backbone.Collection) {
-            this.data = this.getData();
             this.scales = {
                 x: this.getXScale(),
                 y: this.getYScale()
@@ -127,37 +126,15 @@ var Chart = D3.Chart = Backbone.View.extend({
         return this;
     },
 
-    // Maps this.collection to a dataset that can be passed to D3
-    getData: function() {
-        return this.collection.chain()
-            .filter(this.isValidDatum, this)
-            .map(this.getDatum, this)
-            .value();
-    },
-
-    // Maps an individual (valid) model to a datum in D3
-    getDatum: function(model) {
-        return _.extend(model.toJSON(), {
-            x: model.get(this.options.xAttr),
-            y: model.get(this.options.yAttr)
-        });
-    },
-
-    // Determines if a datum or model is valid
-    isValidDatum: function(d) {
-        var opts = this.options;
-        if (d instanceof Backbone.Model) {
-            d = d.toJSON();
-        }
-        return opts.xValid(d[opts.xAttr]) && opts.yValid(d[opts.yAttr]);
-    },
-
     // Control how data is joined to elements with the joinAttr option
     // Override this method to get more fine-grained control of the join
     // https://github.com/mbostock/d3/wiki/Selections#wiki-data
     joinData: function(d, i) {
         var joinAttr = this.options.joinAttr;
-        if (joinAttr && _(d).has(joinAttr)) {
+
+        if (joinAttr && d instanceof Backbone.Model) {
+            return d.get(joinAttr);
+        } else if (joinAttr && _(d).has(joinAttr)) {
             return d[joinAttr];
         } else {
             return i;
@@ -165,15 +142,30 @@ var Chart = D3.Chart = Backbone.View.extend({
     },
 
     // Get the minimum or maximum value over the whole data for linear scales
-    getLinearExtent: function(data, attr, minmax) {
+    getLinearExtent: function(attr, minmax) {
         // Return either one extreme or whole extent
         if (minmax) {
-            return _(data).chain().pluck(attr)[minmax]().value();
+            return _[minmax](this.collection.pluck(attr));
         } else {
             return [
-                this.getLinearExtent(data, attr, 'min'),
-                this.getLinearExtent(data, attr, 'max')
+                this.getLinearExtent(attr, 'min'),
+                this.getLinearExtent(attr, 'max')
             ];
+        }
+    },
+
+    // Get the x value for a datum
+    getX: function(d) { return this._getDatumValue(d, this.options.xAttr); },
+
+    // Get the y value for a datum
+    getY: function(d) { return this._getDatumValue(d, this.options.yAttr); },
+
+    // Return x/y value for the given datum or model
+    _getDatumValue: function(d, attrName) {
+        if (d instanceof Backbone.Model) {
+            return d.get(attrName);
+        } else {
+            return d ? d[attrName] : null;
         }
     },
 
@@ -229,20 +221,20 @@ var Bar = D3.Bar = Chart.extend({
             y = this.scales.y;
 
         var bars = this.svg.selectAll('.bar')
-            .data(this.data, this.joinData)
+            .data(this.collection.models, this.joinData)
             .enter().append('rect')
                 .attr('class', 'bar')
                 .attr('width', x.rangeBand())
-                .attr('height', function(d) { return chart.height - y(d.y); })
+                .attr('height', function(d) { return chart.height - y(chart.getY(d)); })
                 .attr('transform', function(d) {
-                    return 'translate(' + x(d.x) + ',' + y(d.y) + ')';
+                    return 'translate(' + x(chart.getX(d)) + ',' + y(chart.getY(d)) + ')';
                 });
     },
 
     getXScale: function() {
         return d3.scale.ordinal()
             .rangeRoundBands([0, this.width], this.options.barPadding)
-            .domain(_.pluck(this.data, this.options.xAttr));
+            .domain(this.collection.pluck(this.options.xAttr));
     },
 
     getYScale: function() {
@@ -250,7 +242,7 @@ var Bar = D3.Bar = Chart.extend({
             .rangeRound([this.height, 0])
             .domain([
                 0,
-                this.getLinearExtent(this.data, this.options.yAttr, 'max')
+                this.getLinearExtent(this.options.yAttr, 'max')
             ])
             .nice();
     }
@@ -268,25 +260,6 @@ var Line = D3.Line = Chart.extend({
         colorAttr: 'color',                 // Color attribute on each series
         interpolate: 'monotone',            // Line interpolation method
         colorScale: d3.scale.category10()   // Default color scale for lines
-    },
-
-    getData: function() {
-        // Perform data validation on per-series level
-        return this.collection.map(this.getDatum, this);
-    },
-
-    // Parse an individual series of data
-    getDatum: function(model, i) {
-        var opts = this.options,
-            series = model.toJSON();
-
-        // Make sure each series has a color
-        series[opts.colorAttr] = series[opts.colorAttr] || opts.colorScale(i);
-
-        // Filter invalid values
-        series[opts.valuesAttr] = _.filter(series[opts.valuesAttr], this.isValidDatum, this);
-
-        return series;
     },
 
     renderAxes: function() {
@@ -330,20 +303,22 @@ var Line = D3.Line = Chart.extend({
             .y(function(d) { return y(d[opts.yAttr]); });
 
         var series = this.svg.selectAll('.series')
-            .data(this.data, this.joinData)
+            .data(this.collection.models, this.joinData)
             .enter().append('g')
                 .attr('class', 'series');
 
         series.append('path')
             .attr('class', 'line')
-            .attr('d', function(series) { return line(series[opts.valuesAttr]); })
-            .style('stroke', function(series) { return series[opts.colorAttr]; });
+            .attr('d', function(series) { return line(series.get(opts.valuesAttr)); })
+            .style('stroke', function(series, i) {
+                return series.get(opts.colorAttr) || opts.colorScale(i);
+            });
     },
 
     getXScale: function() {
         return d3.scale[this.options.xScale]()
             .rangeRound([0, this.width])
-            .domain(this.getLinearExtent(this.data, this.options.xAttr));
+            .domain(this.getLinearExtent(this.options.xAttr));
     },
 
     getYScale: function() {
@@ -351,23 +326,25 @@ var Line = D3.Line = Chart.extend({
             .rangeRound([this.height, 0])
             .domain([
                 0, // Force scale to start from zero
-                this.getLinearExtent(this.data, this.options.yAttr, 'max')
+                this.getLinearExtent(this.options.yAttr, 'max')
             ])
             .nice();
     },
 
-    getLinearExtent: function(data, attr, minmax) {
+    getLinearExtent: function(attr, minmax) {
         if (!minmax) {
             // Keep recursive behavior
             return Chart.prototype.getLinearExtent.apply(this, arguments);
         }
 
         // Return extent over all series
-        return _(data).chain().map(function(series) {
-            return _[minmax](series[this.options.valuesAttr], function(d) {
+        var seriesExtents = this.collection.map(function(series) {
+            var values = series.get(this.options.valuesAttr);
+            return _[minmax](values, function(d) {
                 return d && d[attr];
             })[attr];
-        }, this)[minmax]().value();
+        }, this);
+        return _[minmax](seriesExtents);
     }
 
 });
@@ -386,7 +363,7 @@ var TimeSeries = D3.TimeSeries = Line.extend({
     getXScale: function() {
         return d3.time.scale.utc()
             .range([0, this.width])
-            .domain(this.getLinearExtent(this.data, this.options.xAttr));
+            .domain(this.getLinearExtent(this.options.xAttr));
     }
 
 });
@@ -417,10 +394,6 @@ var CountryMap = D3.CountryMap = Chart.extend({
 
     initialize: function() {
         _.bindAll(this, 'getMapTransform', 'getCountryFill', 'getCountryClass');
-        // Optimize calls to getDataBounds
-        this.getDataBounds = _.memoize(this.getDataBounds, function(data) {
-            return _.keys(data).toString();
-        });
         Chart.prototype.initialize.apply(this, arguments);
     },
 
@@ -473,18 +446,18 @@ var CountryMap = D3.CountryMap = Chart.extend({
     },
 
     getYScale: function() {
-        var domain = this.getLinearExtent(this.data, 'y');
+        var domain = this.getLinearExtent('y');
         return d3.scale[this.options.yScale]()
             .range(this.options.colorRange)
             // If data contains only one datum it should be mapped
             // to the highest color
-            .domain(this.data.length == 1 ? [0, domain[1]] : domain);
+            .domain(this.collection.length == 1 ? [0, domain[1]] : domain);
     },
 
     getCountryClass: function(f) {
         var classes = ['country'],
-            d = _(this.data).findWhere({ x: f.properties && f.properties.code });
-        if (d && this.options.yValid(d.y)) {
+            d = this.collection.findWhere({ x: f.properties && f.properties.code });
+        if (d && this.options.yValid(this.getY(d))) {
             classes.push('country-data');
         }
         return classes.join(' ');
@@ -492,23 +465,23 @@ var CountryMap = D3.CountryMap = Chart.extend({
 
     getCountryFill: function(f) {
         if (!f.properties) return null;
-        var d = _(this.data).findWhere({ x: f.properties.code });
-        return d ? this.scales.y(d.y) : null;
+        var d = this.collection.findWhere({ x: f.properties.code });
+        return d ? this.scales.y(this.getY(d)) : null;
     },
 
     getCountryTitle: function(f) {
         if (!f.properties) return '';
-        var d = _(this.data).findWhere({ x: f.properties.code }),
+        var d = this.collection.findWhere({ x: f.properties.code }),
             title = f.properties.name;
-        if (d && this.options.yValid(d.y)) {
-            title += ': ' + this.options.yFormat(d.y);
+        if (d && this.options.yValid(this.getY(d))) {
+            title += ': ' + this.options.yFormat(this.getY(d));
         }
         return title;
     },
 
     addCountryTooltip: function(node, f) {
         if (!f.properties) return;
-        var dataBounds = this.getDataBounds(this.data),
+        var dataBounds = this.getDataBounds(this.collection),
             bounds = this.scales.x.bounds(f);
 
         if ($.fn.tooltip) {
@@ -537,7 +510,7 @@ var CountryMap = D3.CountryMap = Chart.extend({
 
     getMapTransform: function() {
         // http://bl.ocks.org/mbostock/4699541
-        var b = this.getDataBounds(this.options.autoZoom ? this.data : null),
+        var b = this.getDataBounds(this.options.autoZoom ? this.collection : null),
             base = this.scales.x.projection().translate(),
             scale = this.getMapScale(),
             t = [-(b[1][0] + b[0][0]) / 2, -(b[1][1] + b[0][1]) / 2];
@@ -547,7 +520,7 @@ var CountryMap = D3.CountryMap = Chart.extend({
     getMapScale: function() {
         // http://bl.ocks.org/mbostock/4699541
         var zoomFactor = this.options.zoomFactor,
-            b = this.getDataBounds(this.options.autoZoom ? this.data : null),
+            b = this.getDataBounds(this.options.autoZoom ? this.collection : null),
             w = this.width,
             h = this.height;
         return zoomFactor / Math.max((b[1][0] - b[0][0]) / w, (b[1][1] - b[0][1]) / h);
@@ -563,10 +536,15 @@ var CountryMap = D3.CountryMap = Chart.extend({
         var result = [[Infinity, Infinity], [-Infinity, -Infinity]],
             opts = this.options;
 
+        // Make sure we're handling a list of models
+        if (data instanceof Backbone.Collection) {
+            data = data.models;
+        }
+
         _(data).each(function(d) {
             var feature = _(opts.countryData.features).find(function(f) {
-                return f.properties.code == d.x;
-            });
+                return f.properties.code == this.getX(d);
+            }, this);
             if (!feature) return;
             var bounds = this.scales.x.bounds(feature);
             if (result[1][1] < bounds[1][1]) result[1][1] = bounds[1][1];
