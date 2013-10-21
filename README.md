@@ -1,5 +1,7 @@
 # backbone.d3
 
+[![Build Status](https://travis-ci.org/AdRoll/backbone.d3.png?branch=master)](https://travis-ci.org/AdRoll/backbone.d3)
+
 backbone.d3 is a [Backbone.js](http://backbonejs.org/) plugin that provides a set of reusable charts using the [D3.js visualization library](http://d3js.org/).
 
 [Stay tuned](http://twitter.com/AdRollDev) for more info!
