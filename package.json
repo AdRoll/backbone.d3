@@ -1,6 +1,7 @@
 {
   "name": "backbone.d3",
   "description": "Reusable D3 visualizations using Backbone.js views",
+  "version": "0.0.1",
   "author": "Jyri Tuulos <jyri.tuulos@adroll.com>",
   "url": "https://github.com/AdRoll/backbone.d3",
   "devDependencies": {
@@ -8,12 +9,13 @@
     "mocha-phantomjs": "~3.1.5",
     "grunt": "~0.4.1",
     "grunt-cli": "~0.1.9",
-    "grunt-mocha-phantomjs": "~0.3.0"
+    "grunt-mocha-phantomjs": "~0.3.0",
+    "grunt-preprocess": "~3.0.1",
+    "grunt-contrib-clean": "~0.5.0"
   },
   "scripts": {
     "test": "./node_modules/.bin/grunt test"
   },
-  "version": "0.0.1",
   "license": "MIT",
   "repository": {
     "type": "git",

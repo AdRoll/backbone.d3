@@ -1,13 +1,13 @@
 /*!
- * backbone.d3 0.1.0
+ * backbone.d3 0.0.1
  *
  * Copyright (c) 2013 AdRoll
  * MIT license
- * http://github.com/AdRoll/backbone.d3
+ * https://github.com/AdRoll/backbone.d3
  */
 
 
- /* Common chart styles */
+/* Common chart styles */
 .bbd3 .axis path,
 .bbd3 .axis line {
     fill: none;

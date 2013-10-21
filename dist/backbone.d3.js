@@ -1,8 +1,11 @@
-// backbone.d3 0.1.0
-//
-// Copyright (c) 2013 AdRoll
-// MIT license
-// http://github.com/AdRoll/backbone.d3
+/*!
+ * backbone.d3 0.0.1
+ *
+ * Copyright (c) 2013 AdRoll
+ * MIT license
+ * https://github.com/AdRoll/backbone.d3
+ */
+
 
 (function() {
 
@@ -20,7 +23,7 @@ var _           = root._,
 var D3 = root.D3 = Backbone.D3 = {};
 
 // Current version of the library
-D3.VERSION = '0.1.0';
+D3.VERSION = '0.0.1';
 
 
 

@@ -1,0 +1,40 @@
+/* @echo BANNER */
+
+
+/* Common chart styles */
+.bbd3 .axis path,
+.bbd3 .axis line {
+    fill: none;
+    stroke: #ddd;
+    shape-rendering: crispEdges;
+}
+
+
+/* Bar chart styles */
+.bbd3-bar .x.axis .domain {
+    display: none;
+}
+
+.bbd3-bar .bar {
+    fill: steelblue;
+}
+
+
+/* Line chart */
+.bbd3-line .series .line {
+    stroke-width: 2;
+    stroke-linejoin: round;
+    stroke-linecap: round;
+    fill: none;
+}
+
+
+/* Country map */
+.bbd3-countrymap .country {
+    fill: #ddd;
+    fill-rule: evenodd;
+    stroke: #fff;
+    stroke-width: 1;
+    stroke-linejoin: round;
+    stroke-linecap: round;
+}
