@@ -25,8 +25,6 @@ var D3 = root.D3 = Backbone.D3 = {};
 // Current version of the library
 D3.VERSION = '0.0.1';
 
-
-
 // Helpers
 // -------
 
@@ -58,7 +56,6 @@ D3.format = {
 
 };
 
-
 // Global defaults for charts
 D3.chartDefaults = {
     joinAttr: null,
@@ -83,7 +80,7 @@ D3.chartDefaults = {
 
 
 // Base view for all charts
-var Chart = D3.Chart = Backbone.View.extend({
+D3.Chart = Backbone.View.extend({
 
     className: 'bbd3',
 
@@ -184,11 +181,10 @@ var Chart = D3.Chart = Backbone.View.extend({
 
 });
 
-
 // Basic bar chart
-var Bar = D3.Bar = Chart.extend({
+D3.Bar = D3.Chart.extend({
 
-    className: Chart.prototype.className + ' bbd3-bar',
+    className: D3.Chart.prototype.className + ' bbd3-bar',
 
     defaults: {
         xFormat: _.identity,
@@ -256,11 +252,10 @@ var Bar = D3.Bar = Chart.extend({
 
 });
 
-
 // Multi line chart
-var Line = D3.Line = Chart.extend({
+D3.Line = D3.Chart.extend({
 
-    className: Chart.prototype.className + ' bbd3-line',
+    className: D3.Chart.prototype.className + ' bbd3-line',
 
     defaults: {
         valuesAttr: 'values',               // Values list on each series
@@ -341,7 +336,7 @@ var Line = D3.Line = Chart.extend({
     getLinearExtent: function(attr, minmax) {
         if (!minmax) {
             // Keep recursive behavior
-            return Chart.prototype.getLinearExtent.apply(this, arguments);
+            return D3.Chart.prototype.getLinearExtent.apply(this, arguments);
         }
 
         // Return extent over all series
@@ -356,16 +351,15 @@ var Line = D3.Line = Chart.extend({
 
 });
 
-
 // Time series chart
-var TimeSeries = D3.TimeSeries = Line.extend({
+D3.TimeSeries = D3.Line.extend({
 
-    className: Line.prototype.className + ' bbd3-timeseries',
+    className: D3.Line.prototype.className + ' bbd3-timeseries',
 
     defaults: _.defaults({
         xFormat: d3.time.scale.utc().tickFormat(),
         xValid: _.isDate
-    }, Line.prototype.defaults),
+    }, D3.Line.prototype.defaults),
 
     getXScale: function() {
         return d3.time.scale.utc()
@@ -375,11 +369,10 @@ var TimeSeries = D3.TimeSeries = Line.extend({
 
 });
 
-
 // Country map
-var CountryMap = D3.CountryMap = Chart.extend({
+D3.CountryMap = D3.Chart.extend({
 
-    className: Chart.prototype.className + ' bbd3-countrymap',
+    className: D3.Chart.prototype.className + ' bbd3-countrymap',
 
     defaults: {
         xValid: _.isString,
@@ -401,7 +394,7 @@ var CountryMap = D3.CountryMap = Chart.extend({
 
     initialize: function() {
         _.bindAll(this, 'getMapTransform', 'getCountryFill', 'getCountryClass');
-        Chart.prototype.initialize.apply(this, arguments);
+        D3.Chart.prototype.initialize.apply(this, arguments);
     },
 
     renderData: function() {
