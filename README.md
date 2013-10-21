@@ -12,3 +12,7 @@ backbone.d3 is a [Backbone.js](http://backbonejs.org/) plugin that provides a se
 Copyright 2013 AdRoll
 
 Licensed under the [MIT License](LICENSE)
+
+
+[![Bitdeli Badge](https://d2weczhvl823v0.cloudfront.net/AdRoll/backbone.d3/trend.png)](https://bitdeli.com/free "Bitdeli Badge")
+
