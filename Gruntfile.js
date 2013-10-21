@@ -26,9 +26,13 @@ module.exports = function(grunt) {
                     BANNER: '<%= meta.banner %>'
                 }
             },
-            core: {
+            scripts: {
                 files: {
-                    'dist/<%= pkg.name %>.js': 'src/core.js',
+                    'dist/<%= pkg.name %>.js': 'src/core.js'
+                }
+            },
+            styles: {
+                files: {
                     'dist/<%= pkg.name %>.css': 'src/core.css'
                 }
             }
@@ -57,6 +61,29 @@ module.exports = function(grunt) {
             }
         },
 
+        jshint: {
+            options: {
+                ignores: ['test/vendor/**/*.js']
+            },
+            scripts: ['Gruntfile.js', 'src/**/*.js'],
+            test: ['test/**/*.js']
+        },
+
+        watch: {
+            scripts: {
+                files: ['Gruntfile.js', 'src/**/*.js'],
+                tasks: ['jshint:scripts', 'preprocess:scripts']
+            },
+            styles: {
+                files: ['src/**/*.css'],
+                tasks: ['preprocess:styles']
+            },
+            test: {
+                files: ['test/**/*.js'],
+                tasks: ['jshint:test']
+            }
+        },
+
         mocha_phantomjs: {
             all: ['test/**/*.html']
         }
@@ -68,10 +95,14 @@ module.exports = function(grunt) {
     grunt.loadNpmTasks('grunt-contrib-clean');
     grunt.loadNpmTasks('grunt-contrib-uglify');
     grunt.loadNpmTasks('grunt-contrib-cssmin');
+    grunt.loadNpmTasks('grunt-contrib-jshint');
+    grunt.loadNpmTasks('grunt-contrib-watch');
 
-    grunt.registerTask('test', ['mocha_phantomjs']);
+    grunt.registerTask('test', ['jshint', 'mocha_phantomjs']);
 
-    grunt.registerTask('release', ['clean:release', 'preprocess:core',
+    grunt.registerTask('dev', ['jshint', 'preprocess', 'watch']);
+
+    grunt.registerTask('release', ['clean:release', 'preprocess',
                                    'uglify:release', 'cssmin:release']);
 
     grunt.registerTask('default', ['release']);
