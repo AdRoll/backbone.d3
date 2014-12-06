@@ -26,6 +26,8 @@ D3.Chart = Backbone.View.extend({
 
     className: 'bbd3',
 
+    options: {},
+
     initialize: function() {
         _.bindAll(this, 'joinData');
 

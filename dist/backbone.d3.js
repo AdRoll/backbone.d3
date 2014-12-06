@@ -1,7 +1,7 @@
 /*!
  * backbone.d3 0.0.1
  *
- * Copyright (c) 2013 AdRoll
+ * Copyright (c) 2014 AdRoll
  * MIT license
  * https://github.com/AdRoll/backbone.d3
  */
@@ -83,6 +83,8 @@ D3.chartDefaults = {
 D3.Chart = Backbone.View.extend({
 
     className: 'bbd3',
+
+    options: {},
 
     initialize: function() {
         _.bindAll(this, 'joinData');
